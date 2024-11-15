@@ -57,6 +57,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ExamenTheme {
+                var buttonColor by remember { mutableStateOf(Color.Magenta) }
+
                 Column {
                     StudentCard(
                         studentName = "Alumno: " + nombre,
@@ -70,9 +72,11 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        RandomColorButton()
+                        RandomColorButton(buttonColor) { newColor ->
+                            buttonColor = newColor
+                        }
                     }
-                    Conversation(Mensajes.conversationSample)
+                    Conversation(Mensajes.conversationSample, buttonColor)
                 }
             }
         }
@@ -91,12 +95,12 @@ val shadow8=Color(0xFFAA00FF)
 val profesor= R.drawable.profesor
 
 @Composable
-fun MessageCard(msg: Message) {
+fun MessageCard(msg: Message, cardColor: Color) {
     Row(modifier = Modifier.padding(all = 8.dp)) {
         var isExpanded by remember { mutableStateOf(false) }
 
         val surfaceColor by animateColorAsState(
-            targetValue = if (isExpanded) Color.Magenta else Color.Gray
+            targetValue = if (isExpanded) cardColor else Color.Gray
         )
         val imageSize by animateDpAsState(targetValue = if (isExpanded) 150.dp else 50.dp)
         Image(
@@ -134,24 +138,22 @@ fun MessageCard(msg: Message) {
 }
 
 @Composable
-fun Conversation(conversation: List<Message>) {
+fun Conversation(conversation: List<Message>, cardColor: Color) {
     Column {
         conversation.forEach { msg ->
-            MessageCard(msg = msg)
+            MessageCard(msg = msg, cardColor = cardColor)
         }
     }
 }
-
 @Composable
-fun RandomColorButton() {
+fun RandomColorButton(currentColor: Color, onColorChange: (Color) -> Unit) {
     val listaColores = listOf(Color.Green, Color.Blue, Color.Red, Color.Cyan)
-    var buttonColor by remember { mutableStateOf(Color.Magenta) }
 
     Button(
         onClick = {
-            buttonColor = listaColores.random()
+            onColorChange(listaColores.random())
         },
-        colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
+        colors = ButtonDefaults.buttonColors(containerColor = currentColor)
     ) {
         Text("Elegir un nuevo color")
     }
